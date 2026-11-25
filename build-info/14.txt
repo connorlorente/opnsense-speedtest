@@ -1,0 +1,13 @@
+Wed Nov 25 10:00:19 UTC 2026
+FreeBSD freebsd 14.3-RELEASE FreeBSD 14.3-RELEASE releng/14.3-n271432-8c9ce319fef7 GENERIC amd64
+FreeBSD:14:amd64
+FreeBSD-14-amd64
+
+_feed/repo/FreeBSD-14-amd64:
+data.pkg
+data.tzst
+meta
+meta.conf
+os-speedtest-0.1.3.pkg
+packagesite.pkg
+packagesite.tzst
