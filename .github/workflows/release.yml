@@ -33,8 +33,11 @@ jobs:
             git init -q -b packages _feed
             git -C _feed remote add origin "$REMOTE"
           fi
+          rm -rf _feed/repo  # both ABIs are rebuilt below
 
-      - name: Build and sign in FreeBSD
+      # One build per FreeBSD major: pkg refuses a package whose ABI differs from the firewall's
+      # (OPNsense 25.7/26.1 run FreeBSD 14, newer series FreeBSD 15). Each lands in repo/<ABI>/.
+      - name: Build and sign (FreeBSD 14.3)
         uses: vmactions/freebsd-vm@v1
         env:
           KEY_PEM: ${{ secrets.FEED_SIGNING_KEY }}
@@ -49,6 +52,27 @@ jobs:
             [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
             printf '%s\n' "$KEY_PEM" > /tmp/feed.key
             chmod 600 /tmp/feed.key
+            rm -rf dist
+            sh tools/build.sh
+            KEY=/tmp/feed.key sh tools/publish.sh _feed
+            rm -f /tmp/feed.key
+
+      - name: Build and sign (FreeBSD 15.0)
+        uses: vmactions/freebsd-vm@v1
+        env:
+          KEY_PEM: ${{ secrets.FEED_SIGNING_KEY }}
+          SERIES: ${{ vars.OPNSENSE_SERIES || 'master' }}  # opnsense/plugins branch: stable/<series> or master
+        with:
+          release: '15.0'
+          usesh: true
+          envs: 'KEY_PEM SERIES'
+          prepare: pkg install -y git
+          run: |
+            set -eu
+            [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
+            printf '%s\n' "$KEY_PEM" > /tmp/feed.key
+            chmod 600 /tmp/feed.key
+            rm -rf dist
             sh tools/build.sh
             KEY=/tmp/feed.key sh tools/publish.sh _feed
             rm -f /tmp/feed.key

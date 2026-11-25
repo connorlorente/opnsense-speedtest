@@ -7,6 +7,8 @@ KEY_DIR='/usr/local/etc/pkg/keys'
 KEY_PATH="${KEY_DIR}/speedtest-repository.pub"
 REPO_PATH='/usr/local/etc/pkg/repos/speedtest.conf'
 
+ABI="$(pkg config ABI | tr : -)"
+
 if [ "$(id -u)" -ne 0 ]; then
     echo 'Run this installer as root.' >&2
     exit 1
@@ -21,7 +23,7 @@ install -d -m 0755 "${KEY_DIR}" /usr/local/etc/pkg/repos
 install -m 0644 "${TEMP_DIR}/speedtest-repository.pub" "${KEY_PATH}"
 cat > "${REPO_PATH}" <<CONF
 Speedtest: {
-  url: "${BASE_URL}/repo",
+  url: "${BASE_URL}/repo/${ABI}",
   mirror_type: "none",
   signature_type: "pubkey",
   pubkey: "${KEY_PATH}",

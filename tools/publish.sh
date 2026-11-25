@@ -4,7 +4,7 @@
 #   tools/publish.sh <feed checkout> [package ...]
 #
 # <feed checkout> is a checkout of this repository's `packages` branch. The given packages
-# (default: everything in ./dist) replace older versions of the same package in repo/
+# (default: everything in ./dist) replace older versions of the same package in repo/<ABI>
 # and the catalog is signed again: pkg lists only what is in the folder at signing time, so every
 # package of the feed must be present. Commit and push the feed checkout afterwards.
 #
@@ -16,7 +16,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FEED="${1:?usage: $0 <feed checkout> [package ...]}"
 shift
 KEY="${KEY:-/root/speedtest-repository.key}"
-DIR="${FEED}/repo"
+ABI="$(pkg config ABI | tr : -)"   # e.g. FreeBSD-15-amd64: pkg refuses a catalog of another ABI
+DIR="${FEED}/repo/${ABI}"
 
 if [ "$#" -eq 0 ]; then
     set -- "${ROOT}"/dist/*.pkg
