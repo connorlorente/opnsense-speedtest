@@ -1,2 +1,2 @@
-_feed/repo/FreeBSD-14-amd64/os-speedtest-0.1.4.pkg os-speedtest-0.1.4 FreeBSD:14:amd64
-_feed/repo/FreeBSD-15-amd64/os-speedtest-0.1.4.pkg os-speedtest-0.1.4 FreeBSD:15:amd64
+_feed/repo/FreeBSD-14-amd64/os-speedtest-0.2.pkg os-speedtest-0.2 FreeBSD:14:amd64
+_feed/repo/FreeBSD-15-amd64/os-speedtest-0.2.pkg os-speedtest-0.2 FreeBSD:15:amd64
