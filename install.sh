@@ -15,6 +15,9 @@ if [ "$1" = "--uninstall" ]; then
            /usr/local/opnsense/mvc/app/models/OPNsense/Speedtest \
            /usr/local/opnsense/mvc/app/views/OPNsense/Speedtest \
            /usr/local/opnsense/scripts/OPNsense/Speedtest
+    rm -f /usr/local/opnsense/www/js/speedtest_gauges.js \
+          /usr/local/opnsense/www/js/widgets/Speedtest.js \
+          /usr/local/opnsense/www/js/widgets/Metadata/Speedtest.xml
     rm -f /usr/local/opnsense/service/conf/actions.d/actions_speedtest.conf \
           /usr/local/etc/inc/plugins.inc.d/speedtest.inc \
           /usr/local/bin/speedtest

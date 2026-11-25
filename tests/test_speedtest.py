@@ -13,4 +13,12 @@ assert r['ok'] and r['down'] == 100.0 and r['up'] == 20.0 and r['server'] == 'S 
 e = s.parse_output('{"type":"log","level":"error","message":"Cannot connect"}\n')
 assert not e['ok'] and e['error'] == 'Cannot connect', e
 assert not s.parse_output('garbage')['ok']
+now = 100 * 86400
+rows = [{'ok': True, 'time': now - 40 * 86400, 'down': 900, 'up': 100},
+        {'ok': True, 'time': now - 86400, 'down': 100, 'up': 10},
+        {'ok': True, 'time': now, 'down': 300, 'up': 30},
+        {'ok': False, 'time': now, 'error': 'x'}]
+m = s.summarize(rows, now)
+assert m == {'down': 300, 'up': 30, 'avg_down': 200.0, 'avg_up': 20.0, 'max': 900}, m
+assert s.summarize([], now)['avg_down'] is None
 print('ok')

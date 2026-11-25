@@ -47,6 +47,11 @@ class ServiceController extends ApiControllerBase
         return ['rows' => $this->json('speedtest results')];
     }
 
+    public function summaryAction()
+    {
+        return $this->json('speedtest summary');
+    }
+
     public function serversAction()
     {
         return $this->json('speedtest servers');

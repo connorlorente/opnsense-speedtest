@@ -67,6 +67,24 @@ def read_rows():
         return []
 
 
+def summarize(rows, now):
+    """Latest and 30-day average speeds for the gauges."""
+    # shortcut: the average only sees stored results; raise retention if tests run more than ~16x a day
+    good = [r for r in rows if r.get('ok')]
+    month = [r for r in good if r['time'] >= now - 30 * 86400]
+
+    def avg(key):
+        return round(sum(r[key] for r in month) / len(month), 2) if month else None
+
+    return {
+        'down': good[-1]['down'] if good else None,
+        'up': good[-1]['up'] if good else None,
+        'avg_down': avg('down'),
+        'avg_up': avg('up'),
+        'max': max((max(r['down'], r['up']) for r in good), default=None),
+    }
+
+
 def run():
     import fcntl
     os.makedirs(DB, mode=0o750, exist_ok=True)
@@ -149,7 +167,9 @@ if __name__ == '__main__':
         print(json.dumps({'status': 'ok'}))
     elif cmd == 'results':
         print(json.dumps(read_rows()))
+    elif cmd == 'summary':
+        print(json.dumps(summarize(read_rows(), time.time())))
     elif cmd == 'servers':
         print(json.dumps(servers()))
     else:
-        sys.exit('usage: speedtest.py run|status|results|servers|clear')
+        sys.exit('usage: speedtest.py run|status|results|summary|servers|clear')

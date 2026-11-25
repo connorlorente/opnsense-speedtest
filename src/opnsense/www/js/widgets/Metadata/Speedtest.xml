@@ -1,0 +1,12 @@
+<metadata>
+    <speedtest>
+        <filename>Speedtest.js</filename>
+        <link>/ui/speedtest</link>
+        <endpoints>
+            <endpoint>/api/speedtest/service/summary</endpoint>
+        </endpoints>
+        <translations>
+            <title>Speed Test</title>
+        </translations>
+    </speedtest>
+</metadata>

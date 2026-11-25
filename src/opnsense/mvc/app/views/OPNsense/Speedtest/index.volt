@@ -6,12 +6,14 @@
     </div>
 
     <div id="noLicense" class="alert alert-info" style="display:none">
-        Tick <b>Accept Ookla terms</b> in Settings below and save before running a test.
+        Tick <b>Accept Ookla terms</b> in <a href="/ui/speedtest/settings">Settings</a> and save before running a test.
     </div>
 
-    <div class="col-xs-12">
+    <div class="col-xs-12" style="padding-top:15px">
         <button id="runBtn" class="btn btn-primary"><i class="fa fa-play fa-fw"></i> Run test</button>
         <span id="runMsg" style="margin-left:10px"></span>
+        <hr/>
+        <div id="gauges"></div>
         <hr/>
         <h3>Latest result</h3>
         <div id="latest" class="text-muted">No results yet.</div>
@@ -24,22 +26,12 @@
             <thead><tr><th>Time</th><th>Down</th><th>Up</th><th>Ping (ms)</th><th>Jitter (ms)</th><th>Loss (%)</th><th>Server</th><th>ISP</th><th>Interface</th></tr></thead>
             <tbody></tbody>
         </table>
-        <hr/>
-        <h3>Settings</h3>
-        {{ partial("layout_partials/base_form",['fields':settingsForm,'id':'frm_settings']) }}
-        <button id="saveBtn" class="btn btn-primary">Save</button>
-        <button id="serversBtn" class="btn btn-default">Find servers</button>
-        <table class="table table-condensed table-hover" id="servers" style="display:none;margin-top:10px">
-            <thead><tr><th>ID</th><th>Name</th><th>Location</th></tr></thead>
-            <tbody></tbody>
-        </table>
     </div>
 </div>
 
+<script src="/ui/js/speedtest_gauges.js"></script>
 <script>
 $(function () {
-    var serverField = '[id="speedtest.general.server_id"]';
-
     function cell(tr, text) { $('<td>').text(text === undefined || text === null ? '' : text).appendTo(tr); }
 
     function chart(rows) {
@@ -62,6 +54,7 @@ $(function () {
     }
 
     function loadResults() {
+        $.get('/api/speedtest/service/summary', function (s) { $('#gauges').html(window.speedtestGauges(s)); });
         $.get('/api/speedtest/service/results', function (d) {
             var rows = d.rows || [], tb = $('#hist tbody').empty();
             var good = rows.filter(function (r) { return r.ok; });
@@ -116,26 +109,6 @@ $(function () {
     $('#installBtn').click(function () {
         $('#installMsg').text('Installing...');
         $.post('/api/speedtest/service/install', function (d) { $('#installMsg').text(d.output); poll(); });
-    });
-
-    mapDataToFormUI({'frm_settings': '/api/speedtest/settings/get'}).done(function () {
-        $('.selectpicker').selectpicker('refresh');
-    });
-    $('#saveBtn').click(function () {
-        saveFormToEndpoint('/api/speedtest/settings/set', 'frm_settings', poll, true);
-    });
-
-    $('#serversBtn').click(function () {
-        var b = $(this).prop('disabled', true);
-        $.get('/api/speedtest/service/servers', function (d) {
-            var tb = $('#servers tbody').empty();
-            (d.servers || []).forEach(function (s) {
-                var tr = $('<tr style="cursor:pointer">').appendTo(tb);
-                cell(tr, s.id); cell(tr, s.name); cell(tr, s.location + ', ' + s.country);
-                tr.click(function () { $(serverField).val(s.id); });
-            });
-            $('#servers').show();
-        }).always(function () { b.prop('disabled', false); });
     });
 
     poll();

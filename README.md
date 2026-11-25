@@ -43,7 +43,8 @@ On an OPNsense machine of the target release (needs `git`; `pkg install git`):
 
 ### After installing
 
-Open **Reporting -> Speed Test**, tick **Accept Ookla terms** under Settings, save, and run a test.
+Open **Reporting -> Speed Test**, then **Settings**, tick **Accept Ookla terms** and save; run a test under **Results**.
+There is also a **Speed Test** dashboard widget (Lobby -> Dashboard -> add widget).
 Nothing runs until you accept Ookla's EULA / Terms / Privacy Policy.
 
 Uninstalling by any method keeps your history in `/var/db/speedtest` (`rm -rf` it for a full wipe) and the inert

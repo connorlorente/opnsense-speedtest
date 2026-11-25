@@ -1,5 +1,8 @@
 <menu>
     <Reporting>
-        <Speedtest VisibleName="Speed Test" cssClass="fa fa-tachometer fa-fw" url="/ui/speedtest"/>
+        <Speedtest VisibleName="Speed Test" cssClass="fa fa-tachometer fa-fw">
+            <Results order="10" url="/ui/speedtest"/>
+            <Settings order="20" url="/ui/speedtest/settings"/>
+        </Speedtest>
     </Reporting>
 </menu>
