@@ -56,6 +56,8 @@ jobs:
             sh tools/build.sh
             KEY=/tmp/feed.key sh tools/publish.sh _feed
             rm -f /tmp/feed.key
+            mkdir -p _feed/build-info
+            { date; uname -a; pkg config ABI; ls -R _feed/repo; } > "_feed/build-info/$(uname -r | cut -d. -f1).txt"
 
       - name: Build and sign (FreeBSD 15.0)
         uses: vmactions/freebsd-vm@v1
@@ -76,6 +78,8 @@ jobs:
             sh tools/build.sh
             KEY=/tmp/feed.key sh tools/publish.sh _feed
             rm -f /tmp/feed.key
+            mkdir -p _feed/build-info
+            { date; uname -a; pkg config ABI; ls -R _feed/repo; } > "_feed/build-info/$(uname -r | cut -d. -f1).txt"
 
       - name: Push feed
         run: |
@@ -85,3 +89,9 @@ jobs:
           git add -A
           git commit -q -m "Release ${VERSION}"
           git push origin HEAD:packages
+
+      - name: Verify both ABIs were published
+        run: |
+          for A in FreeBSD-14-amd64 FreeBSD-15-amd64; do
+            ls _feed/repo/$A/os-speedtest-*.pkg || { echo "missing feed for $A" >&2; exit 1; }
+          done
