@@ -16,8 +16,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FEED="${1:?usage: $0 <feed checkout> [package ...]}"
 shift
 KEY="${KEY:-/root/speedtest-repository.key}"
-ABI="$(pkg config ABI | tr : -)"   # e.g. FreeBSD-15-amd64: pkg refuses a catalog of another ABI
-DIR="${FEED}/repo/${ABI}"
+ABI_DIR="$(pkg config ABI | tr : -)"   # e.g. FreeBSD-15-amd64: pkg refuses a catalog of another ABI
+DIR="${FEED}/repo/${ABI_DIR}"
 
 if [ "$#" -eq 0 ]; then
     set -- "${ROOT}"/dist/*.pkg
