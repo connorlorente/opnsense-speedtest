@@ -8,6 +8,10 @@
                 <Default>0</Default>
                 <Required>Y</Required>
             </accept_license>
+            <show_average type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </show_average>
             <enabled type="BooleanField">
                 <Default>0</Default>
                 <Required>Y</Required>

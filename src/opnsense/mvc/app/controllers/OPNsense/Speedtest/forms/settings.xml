@@ -6,6 +6,12 @@
         <help>Required. The Ookla Speedtest CLI needs you to accept the Ookla EULA, Terms of Use and Privacy Policy (https://www.speedtest.net/about/eula). No test runs until this is ticked.</help>
     </field>
     <field>
+        <id>speedtest.general.show_average</id>
+        <label>Show 30-day averages</label>
+        <type>checkbox</type>
+        <help>Untick to show only the last result, on both the Results page and the dashboard widget.</help>
+    </field>
+    <field>
         <id>speedtest.general.enabled</id>
         <label>Scheduled tests</label>
         <type>checkbox</type>

@@ -74,15 +74,15 @@ def summarize(rows, now):
     month = [r for r in good if r['time'] >= now - 30 * 86400]
 
     def avg(key):
-        return round(sum(r[key] for r in month) / len(month), 2) if month else None
+        values = [r[key] for r in month if r.get(key) is not None]  # not every server reports loss
+        return round(sum(values) / len(values), 2) if values else None
 
-    return {
-        'down': good[-1]['down'] if good else None,
-        'up': good[-1]['up'] if good else None,
-        'avg_down': avg('down'),
-        'avg_up': avg('up'),
-        'max': max((max(r['down'], r['up']) for r in good), default=None),
-    }
+    last = good[-1] if good else {}
+    summary = {'max': max((max(r['down'], r['up']) for r in good), default=None)}
+    for key in ('down', 'up', 'ping', 'jitter', 'loss'):
+        summary[key] = last.get(key)
+        summary['avg_' + key] = avg(key)
+    return summary
 
 
 def run():
@@ -168,7 +168,8 @@ if __name__ == '__main__':
     elif cmd == 'results':
         print(json.dumps(read_rows()))
     elif cmd == 'summary':
-        print(json.dumps(summarize(read_rows(), time.time())))
+        show_avg = load_config()[1].get('show_average') != '0'  # unset on older installs: show
+        print(json.dumps(dict(summarize(read_rows(), time.time()), show_avg=show_avg)))
     elif cmd == 'servers':
         print(json.dumps(servers()))
     else:
