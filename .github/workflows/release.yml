@@ -1,0 +1,63 @@
+# Build os-speedtest in a FreeBSD VM, sign the pkg feed with the FEED_SIGNING_KEY secret and push it
+# to the `packages` branch. Release: git tag v0.2 && git push origin v0.2
+name: release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version, e.g. 0.2
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set package version from the tag
+        run: sed -i "s/^PLUGIN_VERSION=.*/PLUGIN_VERSION=\t${VERSION#v}/" Makefile
+
+      - name: Prepare feed checkout (packages branch)
+        run: |
+          REMOTE="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          if git ls-remote --exit-code --heads "$REMOTE" packages > /dev/null; then
+            git clone -q --depth 1 -b packages "$REMOTE" _feed
+          else  # first release: create the branch
+            git init -q -b packages _feed
+            git -C _feed remote add origin "$REMOTE"
+          fi
+
+      - name: Build and sign in FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        env:
+          KEY_PEM: ${{ secrets.FEED_SIGNING_KEY }}
+          SERIES: ${{ vars.OPNSENSE_SERIES || 'master' }}  # opnsense/plugins branch: stable/<series> or master
+        with:
+          release: '14.3'
+          usesh: true
+          envs: 'KEY_PEM SERIES'
+          prepare: pkg install -y git
+          run: |
+            set -eu
+            [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
+            printf '%s\n' "$KEY_PEM" > /tmp/feed.key
+            chmod 600 /tmp/feed.key
+            tools/build.sh
+            KEY=/tmp/feed.key tools/publish.sh _feed
+            rm -f /tmp/feed.key
+
+      - name: Push feed
+        run: |
+          cd _feed
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add -A
+          git commit -q -m "Release ${VERSION}"
+          git push origin HEAD:packages

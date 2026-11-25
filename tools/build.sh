@@ -9,7 +9,7 @@
 set -eu
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SERIES="${SERIES:-$(opnsense-version -a 2>/dev/null || echo master)}"
+SERIES="${SERIES:-$(opnsense-version -a 2>/dev/null || echo master)}"  # plain FreeBSD (CI) has no opnsense-version
 WORK="${WORK:-/tmp/opnsense-plugins-framework}"
 UPSTREAM="${UPSTREAM:-https://github.com/opnsense/plugins.git}"
 PLUGIN=benchmarks/speedtest

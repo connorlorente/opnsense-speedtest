@@ -11,7 +11,6 @@ if [ "$(id -u)" -ne 0 ]; then
     echo 'Run this installer as root.' >&2
     exit 1
 fi
-SERIES="$(opnsense-version -a)"
 
 TEMP_DIR="$(mktemp -d /tmp/speedtest-repository.XXXXXX)"
 trap 'rm -rf "${TEMP_DIR}"' EXIT HUP INT TERM
@@ -22,7 +21,7 @@ install -d -m 0755 "${KEY_DIR}" /usr/local/etc/pkg/repos
 install -m 0644 "${TEMP_DIR}/speedtest-repository.pub" "${KEY_PATH}"
 cat > "${REPO_PATH}" <<CONF
 Speedtest: {
-  url: "${BASE_URL}/repo/${SERIES}",
+  url: "${BASE_URL}/repo",
   mirror_type: "none",
   signature_type: "pubkey",
   pubkey: "${KEY_PATH}",

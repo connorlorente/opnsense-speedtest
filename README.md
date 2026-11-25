@@ -8,7 +8,7 @@ OPNsense plugin: **Reporting -> Speed Test**. Runs the Ookla Speedtest CLI from 
 
 ## Install
 
-### Option 1: package feed (recommended; once a release has been published)
+### Option 1: package feed (recommended; available after the first tagged release)
 
     fetch -qo - https://raw.githubusercontent.com/connorlorente/opnsense-speedtest/packages/install.sh | sh
 
@@ -50,16 +50,25 @@ Uninstalling by any method keeps your history in `/var/db/speedtest` (`rm -rf` i
 `<OPNsense><Speedtest>` block in `/conf/config.xml`. Package removal (`pkg delete os-speedtest` or the GUI) removes the
 CLI and the cron job through the `+PRE_DEINSTALL.pre` hook. Do not mix methods: remove one before using another.
 
-### Publishing a release (maintainer)
+## Upgrading
 
-On the firewall that holds the signing key (`/root/speedtest-repository.key`, see the header of `tools/publish.sh`):
+- **Package feed:** System -> Firmware -> Check for updates, or `pkg upgrade os-speedtest`. Settings and history are kept;
+  an existing Ookla CLI is kept too.
+- **Repo install:** fetch the new tarball and re-run `install.sh`. Settings and history are kept. It does not remove files a
+  newer version dropped, and it only downloads the CLI if missing (delete `/usr/local/bin/speedtest` to force a refresh).
+- **Self-built package:** rebuild and `pkg add -f dist/os-speedtest-*.pkg`.
 
-    git clone -b packages https://github.com/connorlorente/opnsense-speedtest.git /root/feed   # first time: create an orphan `packages` branch
-    tools/build.sh
-    tools/publish.sh /root/feed
-    cd /root/feed && git add -A && git commit -m "Release" && git push origin packages
+## Publishing a release (maintainer)
 
-The feed is per OPNsense series (`repo/<series>/`), so run this on a firewall of each series you support.
+Packages are built and signed by GitHub Actions (`.github/workflows/release.yml`), so no key lives on your machine.
+
+One-time setup:
+1. Generate a signing key and store it as the repo secret **FEED_SIGNING_KEY** (Settings -> Secrets and variables -> Actions),
+   then delete the local file: `openssl genrsa -out k.pem 4096` and paste the contents of `k.pem`.
+2. Optional: set the repo variable **OPNSENSE_SERIES** (e.g. `25.7`) to build against that opnsense/plugins branch; default is `master`.
+
+Each release: `git tag v0.2 && git push origin v0.2`. The tag sets the package version, a FreeBSD VM builds the package,
+the feed is signed with the secret and pushed to the `packages` branch. Check the Actions log on the first run.
 
 ## Layout
 
@@ -68,7 +77,7 @@ The feed is per OPNsense series (`repo/<series>/`), so run this on a firewall of
 - `src/opnsense/service/conf/actions.d/actions_speedtest.conf` configd actions
 - `src/etc/inc/plugins.inc.d/speedtest.inc` cron schedule hook
 - `src/opnsense/mvc/app/...` model, API controllers, page, menu, ACL
-- `tools/build.sh`, `tools/publish.sh`, `feed/install.sh` package build, feed signing and the feed installer
+- `.github/workflows/release.yml`, `tools/build.sh`, `tools/publish.sh`, `feed/install.sh` package build, feed signing and the feed installer
 - `tests/` parser test: `python tests/test_speedtest.py`
 
 ## Status

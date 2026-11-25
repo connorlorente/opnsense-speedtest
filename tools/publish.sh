@@ -4,20 +4,19 @@
 #   tools/publish.sh <feed checkout> [package ...]
 #
 # <feed checkout> is a checkout of this repository's `packages` branch. The given packages
-# (default: everything in ./dist) replace older versions of the same package in repo/<series>
+# (default: everything in ./dist) replace older versions of the same package in repo/
 # and the catalog is signed again: pkg lists only what is in the folder at signing time, so every
 # package of the feed must be present. Commit and push the feed checkout afterwards.
 #
-# One-time key setup (keep the private key off the repo):
-#   openssl genrsa -out /root/speedtest-repository.key 4096 && chmod 600 /root/speedtest-repository.key
+# One-time key setup (CI normally does all of this; see .github/workflows/release.yml):
+#   openssl genrsa -out speedtest-repository.key 4096   (then store it as the FEED_SIGNING_KEY repo secret and delete the file)
 set -eu
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FEED="${1:?usage: $0 <feed checkout> [package ...]}"
 shift
-SERIES="${SERIES:-$(opnsense-version -a)}"
 KEY="${KEY:-/root/speedtest-repository.key}"
-DIR="${FEED}/repo/${SERIES}"
+DIR="${FEED}/repo"
 
 if [ "$#" -eq 0 ]; then
     set -- "${ROOT}"/dist/*.pkg
