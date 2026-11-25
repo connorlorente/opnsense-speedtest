@@ -49,8 +49,8 @@ jobs:
             [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
             printf '%s\n' "$KEY_PEM" > /tmp/feed.key
             chmod 600 /tmp/feed.key
-            tools/build.sh
-            KEY=/tmp/feed.key tools/publish.sh _feed
+            sh tools/build.sh
+            KEY=/tmp/feed.key sh tools/publish.sh _feed
             rm -f /tmp/feed.key
 
       - name: Push feed
