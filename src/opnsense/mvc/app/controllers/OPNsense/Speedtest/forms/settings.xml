@@ -1,0 +1,37 @@
+<form>
+    <field>
+        <id>speedtest.general.accept_license</id>
+        <label>Accept Ookla terms</label>
+        <type>checkbox</type>
+        <help>Required. The Ookla Speedtest CLI needs you to accept the Ookla EULA, Terms of Use and Privacy Policy (https://www.speedtest.net/about/eula). No test runs until this is ticked.</help>
+    </field>
+    <field>
+        <id>speedtest.general.enabled</id>
+        <label>Scheduled tests</label>
+        <type>checkbox</type>
+        <help>Run a test automatically on a schedule.</help>
+    </field>
+    <field>
+        <id>speedtest.general.interval_hours</id>
+        <label>Interval (hours)</label>
+        <type>text</type>
+        <help>1-23, or 24 for daily. Values that do not divide 24 give uneven spacing at midnight.</help>
+    </field>
+    <field>
+        <id>speedtest.general.server_id</id>
+        <label>Server ID</label>
+        <type>text</type>
+        <help>Leave empty to let Speedtest pick the closest server. Use "Find servers" below.</help>
+    </field>
+    <field>
+        <id>speedtest.general.interface</id>
+        <label>Bind to interface</label>
+        <type>dropdown</type>
+        <help>Force the test out of one interface (e.g. a specific WAN). Empty uses the default route.</help>
+    </field>
+    <field>
+        <id>speedtest.general.retention</id>
+        <label>Results to keep</label>
+        <type>text</type>
+    </field>
+</form>

@@ -1,0 +1,7 @@
+# pkg runs this on upgrade as well as delete. Wait until pkg has finished, then only
+# remove the CLI if the plugin is really gone; history in /var/db/speedtest is kept.
+/usr/sbin/daemon -f /bin/sh -c '
+    sleep 15
+    [ -f /usr/local/opnsense/scripts/OPNsense/Speedtest/speedtest.py ] || rm -f /usr/local/bin/speedtest
+    /usr/local/sbin/pluginctl -s cron restart
+'

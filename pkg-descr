@@ -1,0 +1,2 @@
+Run internet speed tests from the firewall with the Ookla Speedtest CLI.
+Adds Reporting -> Speed Test with scheduling, server and interface selection and history graphs.

@@ -1,0 +1,10 @@
+<acl>
+    <page-reporting-speedtest>
+        <name>WebCfg - Reporting: Speed Test</name>
+        <patterns>
+            <pattern>ui/speedtest</pattern>
+            <pattern>ui/speedtest/*</pattern>
+            <pattern>api/speedtest/*</pattern>
+        </patterns>
+    </page-reporting-speedtest>
+</acl>

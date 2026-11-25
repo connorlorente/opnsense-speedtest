@@ -1,0 +1,37 @@
+<model>
+    <mount>//OPNsense/Speedtest</mount>
+    <version>1.0.0</version>
+    <description>Speedtest settings</description>
+    <items>
+        <general>
+            <accept_license type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </accept_license>
+            <enabled type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </enabled>
+            <interval_hours type="IntegerField">
+                <Default>6</Default>
+                <Required>Y</Required>
+                <MinimumValue>1</MinimumValue>
+                <MaximumValue>24</MaximumValue>
+            </interval_hours>
+            <server_id type="IntegerField">
+                <Required>N</Required>
+                <MinimumValue>1</MinimumValue>
+            </server_id>
+            <interface type="InterfaceField">
+                <Required>N</Required>
+                <multiple>N</multiple>
+            </interface>
+            <retention type="IntegerField">
+                <Default>500</Default>
+                <Required>Y</Required>
+                <MinimumValue>10</MinimumValue>
+                <MaximumValue>5000</MaximumValue>
+            </retention>
+        </general>
+    </items>
+</model>

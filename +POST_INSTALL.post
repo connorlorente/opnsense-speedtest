@@ -1,0 +1,2 @@
+# keep an existing CLI on upgrade so it does not need internet access
+[ -x /usr/local/bin/speedtest ] || /bin/sh /usr/local/opnsense/scripts/OPNsense/Speedtest/install_cli.sh || echo "Ookla CLI download failed: use the Install button in Reporting -> Speed Test"
