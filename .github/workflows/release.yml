@@ -35,9 +35,11 @@ jobs:
           fi
           rm -rf _feed/repo  # both ABIs are rebuilt below
 
-      # One build per FreeBSD major: pkg refuses a package whose ABI differs from the firewall's
-      # (OPNsense 25.7/26.1 run FreeBSD 14, newer series FreeBSD 15). Each lands in repo/<ABI>/.
-      - name: Build and sign (FreeBSD 14.3)
+      # pkg refuses a package whose ABI differs from the firewall's (OPNsense 25.7/26.1 run FreeBSD 14,
+      # newer series FreeBSD 15). The package is plain PHP/Python/shell, so one build is repackaged under
+      # each ABI by overriding pkg's ABI option; each lands in repo/<ABI>/. (A FreeBSD 15 VM reported
+      # ABI FreeBSD:14 in practice, so a per-version VM is not reliable.)
+      - name: Build and sign
         uses: vmactions/freebsd-vm@v1
         env:
           KEY_PEM: ${{ secrets.FEED_SIGNING_KEY }}
@@ -52,34 +54,15 @@ jobs:
             [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
             printf '%s\n' "$KEY_PEM" > /tmp/feed.key
             chmod 600 /tmp/feed.key
-            rm -rf dist
-            sh tools/build.sh
-            KEY=/tmp/feed.key sh tools/publish.sh _feed
+            for ABI in FreeBSD:14:amd64 FreeBSD:15:amd64; do
+              export ABI
+              rm -rf dist
+              sh tools/build.sh
+              KEY=/tmp/feed.key sh tools/publish.sh _feed
+            done
             rm -f /tmp/feed.key
             mkdir -p _feed/build-info
-            { date; uname -a; pkg config ABI; ls -R _feed/repo; } > "_feed/build-info/$(uname -r | cut -d. -f1).txt"
-
-      - name: Build and sign (FreeBSD 15.0)
-        uses: vmactions/freebsd-vm@v1
-        env:
-          KEY_PEM: ${{ secrets.FEED_SIGNING_KEY }}
-          SERIES: ${{ vars.OPNSENSE_SERIES || 'master' }}  # opnsense/plugins branch: stable/<series> or master
-        with:
-          release: '15.0'
-          usesh: true
-          envs: 'KEY_PEM SERIES'
-          prepare: pkg install -y git
-          run: |
-            set -eu
-            [ -n "$KEY_PEM" ] || { echo "FEED_SIGNING_KEY secret is not set" >&2; exit 1; }
-            printf '%s\n' "$KEY_PEM" > /tmp/feed.key
-            chmod 600 /tmp/feed.key
-            rm -rf dist
-            sh tools/build.sh
-            KEY=/tmp/feed.key sh tools/publish.sh _feed
-            rm -f /tmp/feed.key
-            mkdir -p _feed/build-info
-            { date; uname -a; pkg config ABI; ls -R _feed/repo; } > "_feed/build-info/$(uname -r | cut -d. -f1).txt"
+            for P in _feed/repo/*/os-speedtest-*.pkg; do echo "$P $(pkg query -F "$P" '%n-%v %q')"; done > _feed/build-info/packages.txt
 
       - name: Push feed
         run: |
