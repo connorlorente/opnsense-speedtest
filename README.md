@@ -6,7 +6,19 @@ OPNsense plugin: **Reporting -> Speed Test**. Runs the Ookla Speedtest CLI from 
 - Scheduled tests (every N hours), server selection, bind to a specific interface
 - Ookla CLI downloaded automatically (checksum-pinned)
 
-## Install from this repo
+## Install
+
+### Option 1: package feed (recommended; once a release has been published)
+
+    fetch -qo - https://raw.githubusercontent.com/connorlorente/opnsense-speedtest/packages/install.sh | sh
+
+This adds a signed pkg repository (`/usr/local/etc/pkg/repos/speedtest.conf`) and its public key. Then install
+**os-speedtest** from System -> Firmware -> Plugins, or `pkg install os-speedtest`. Updates arrive with normal firmware updates.
+
+Remove it: uninstall the plugin, then delete `/usr/local/etc/pkg/repos/speedtest.conf` and
+`/usr/local/etc/pkg/keys/speedtest-repository.pub`.
+
+### Option 2: straight from this repo (no package)
 
 On the firewall, as root (SSH, then option 8 for a shell):
 
@@ -15,24 +27,39 @@ On the firewall, as root (SSH, then option 8 for a shell):
 
 `install.sh` copies `src/` into `/usr/local`, refreshes the menu/ACL caches, restarts configd and
 downloads the Ookla CLI to `/usr/local/bin/speedtest`. Re-run it to upgrade.
+Uninstall: `sh /tmp/opnsense-speedtest-main/install.sh --uninstall` (fetch the repo again if `/tmp` was cleared).
+This removes the plugin files, the Ookla CLI and the scheduled job.
 
-Then open **Reporting -> Speed Test**, tick **Accept Ookla terms** under Settings, save, and run a test.
+### Option 3: build the package yourself
+
+On an OPNsense machine of the target release (needs `git`; `pkg install git`):
+
+    git clone https://github.com/connorlorente/opnsense-speedtest.git
+    cd opnsense-speedtest
+    tools/build.sh                 # package in ./dist
+    pkg add -f dist/os-speedtest-*.pkg
+
+`tools/build.sh` clones the opnsense/plugins build framework for this release into `/tmp` and builds the plugin there.
+
+### After installing
+
+Open **Reporting -> Speed Test**, tick **Accept Ookla terms** under Settings, save, and run a test.
 Nothing runs until you accept Ookla's EULA / Terms / Privacy Policy.
 
-## Uninstall
+Uninstalling by any method keeps your history in `/var/db/speedtest` (`rm -rf` it for a full wipe) and the inert
+`<OPNsense><Speedtest>` block in `/conf/config.xml`. Package removal (`pkg delete os-speedtest` or the GUI) removes the
+CLI and the cron job through the `+PRE_DEINSTALL.pre` hook. Do not mix methods: remove one before using another.
 
-    sh /tmp/opnsense-speedtest-main/install.sh --uninstall
+### Publishing a release (maintainer)
 
-(fetch the repo again first if `/tmp` was cleared). This removes the plugin files, the Ookla CLI and the
-scheduled job. Kept: the history in `/var/db/speedtest` (`rm -rf` it for a full wipe) and the inert
-`<OPNsense><Speedtest>` block in `/conf/config.xml`.
+On the firewall that holds the signing key (`/root/speedtest-repository.key`, see the header of `tools/publish.sh`):
 
-## Build a .pkg instead
+    git clone -b packages https://github.com/connorlorente/opnsense-speedtest.git /root/feed   # first time: create an orphan `packages` branch
+    tools/build.sh
+    tools/publish.sh /root/feed
+    cd /root/feed && git add -A && git commit -m "Release" && git push origin packages
 
-Put this folder at `plugins/benchmarks/speedtest` in the [OPNsense plugins tree](https://github.com/opnsense/plugins)
-and run `make package`. Install with `pkg add`; remove with `pkg delete os-speedtest` (or System -> Firmware -> Plugins).
-The `+POST_INSTALL.post` / `+PRE_DEINSTALL.pre` hooks do the CLI download and cleanup in that case.
-Do not mix the two methods: remove one before using the other.
+The feed is per OPNsense series (`repo/<series>/`), so run this on a firewall of each series you support.
 
 ## Layout
 
@@ -41,6 +68,7 @@ Do not mix the two methods: remove one before using the other.
 - `src/opnsense/service/conf/actions.d/actions_speedtest.conf` configd actions
 - `src/etc/inc/plugins.inc.d/speedtest.inc` cron schedule hook
 - `src/opnsense/mvc/app/...` model, API controllers, page, menu, ACL
+- `tools/build.sh`, `tools/publish.sh`, `feed/install.sh` package build, feed signing and the feed installer
 - `tests/` parser test: `python tests/test_speedtest.py`
 
 ## Status
